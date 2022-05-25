@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="https://kendo.cdn.telerik.com/2022.2.510/styles/kendo.common.min.css" rel="stylesheet" />
+    <link href="https://kendo.cdn.telerik.com/2022.2.510/styles/kendo.default.min.css" rel="stylesheet" />
+    <script src="https://kendo.cdn.telerik.com/2022.2.510/js/jquery.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2022.2.510/js/kendo.all.min.js"></script>
+   
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script>
+
+        var listGlobalInidces; 
+        const getIndices = function () {
+      
+            const API_URL = "https://startup.bolsadesantiago.com/api/consulta/TickerOnDemand/getIndices"
+            const xhr = new  XMLHttpRequest();
+            function onRequestHandelr(){
+                if(this.readyState == 4 && this.status == 200){
+                    console.log(this.response);
+                    listGlobalInidces = JSON.parse(this.response);
+
+                    if(listGlobalInidces === undefined){
+                        let value = `{"listaResult":[{"Nombre":"SPCLXIGPA","Valor":27031.913315856,"Mayor":27103.77,"Menor":26743.7,"Medio":0,"Variacion":0.19},{"Nombre":"SP IPSA","Valor":5142.751502889,"Mayor":5156.69,"Menor":5096.93,"Medio":0,"Variacion":0.3},{"Nombre":"SPCLXIN10","Valor":8001.824335961,"Mayor":8035.17,"Menor":7843.6,"Medio":0,"Variacion":0.15}]}`
+                        listGlobalInidces = JSON.parse(value); 
+                    }
+
+                }else{
+                    let value = `{"listaResult":[{"Nombre":"SPCLXIGPA","Valor":27031.913315856,"Mayor":27103.77,"Menor":26743.7,"Medio":0,"Variacion":0.19},{"Nombre":"SP IPSA","Valor":5142.751502889,"Mayor":5156.69,"Menor":5096.93,"Medio":0,"Variacion":0.3},{"Nombre":"SPCLXIN10","Valor":8001.824335961,"Mayor":8035.17,"Menor":7843.6,"Medio":0,"Variacion":0.15}]}`
+                    listGlobalInidces = JSON.parse(value);
+                }
+            }
+
+            xhr.addEventListener("load", onRequestHandelr);
+            xhr.open("POST", `${API_URL}/?access_token=12FC774FB3554A2C94CAD433B9F55FB8`);
+            xhr.send();
+        }
+
+    </script>
+
+    <script>  
+
+        function recargar () {
+            window.location.href = window.location.href;
+        }
+
+        function verInfo() {
+            mostrar('chart'); 
+            ocultar('app');
+
+            console.log(listGlobalInidces);
+
+            function createChart() {
+            $("#chart").kendoChart({
+                title: {
+                    text: "Valor de indicadores hoy"
+                },
+                legend: {
+                    visible: false
+                },
+                seriesDefaults: {
+                    type: "bar"
+                },
+                series: [{
+                    name: "Valor",
+                    data: [listGlobalInidces.listaResult[0].Valor, listGlobalInidces.listaResult[1].Valor, listGlobalInidces.listaResult[2].Valor]
+                }, {
+                    name: "Mayor",
+                    data: [listGlobalInidces.listaResult[0].Mayor, listGlobalInidces.listaResult[1].Mayor, listGlobalInidces.listaResult[2].Mayor]
+                }, {
+                    name: "Medio",
+                    data: [listGlobalInidces.listaResult[0].Medio, listGlobalInidces.listaResult[1].Medio, listGlobalInidces.listaResult[2].Medio]
+                },{
+                    name: "Menor",
+                    data: [listGlobalInidces.listaResult[0].Menor, listGlobalInidces.listaResult[1].Menor, listGlobalInidces.listaResult[2].Menor]
+                },{
+                    name: "Variacion",
+                    data: [listGlobalInidces.listaResult[0].Variacion, listGlobalInidces.listaResult[1].Variacion, listGlobalInidces.listaResult[2].Variacion]
+                }
+                ],
+                valueAxis: {
+                    max: 10000,
+                    line: {
+                        visible: false
+                    },
+                    minorGridLines: {
+                        visible: true
+                    },
+                    labels: {
+                        rotation: "auto"
+                    }
+                },
+                categoryAxis: {
+                    categories: [listGlobalInidces.listaResult[0].Nombre, 
+                                listGlobalInidces.listaResult[1].Nombre, 
+                                listGlobalInidces.listaResult[2].Nombre],
+                    majorGridLines: {
+                        visible: false
+                    }
+                },
+                tooltip: {
+                    visible: true,
+                    template: "#= series.name #: #= value #"
+                }
+            });
+        }
+
+        $(document).ready(createChart);
+        $(document).bind("kendo:skinChange", createChart);
+
+
+        }
+    </script>
+
+
+    <script>
+
+
+        function listaIndices(){
+            mostrar('app'); 
+            ocultar('chart');
+
+
+            console.log(listGlobalInidces);     
+            const HTMLResponse = document.querySelector("#app");
+
+            const tpl = listGlobalInidces.listaResult.map((user) => `<li>Indice: ${user.Nombre}  Valor: ${user.Valor}  Mayor: ${user.Mayor}  Menor: ${user.Menor}  Medio: ${user.Medio}  Variación: ${user.Variacion}</li>`);
+            HTMLResponse.innerHTML = `<ul>${tpl}</ul>`;
+
+
+        }
+
+        function mostrar(into){
+            document.getElementById(into).style.display  = 'block';
+        }
+
+        function ocultar(into){
+            document.getElementById(into).style.display  = 'none';
+        }
+
+    </script>
+
+</head>
+<body onload="getIndices();">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#" onclick="recargar()">Api BCS INDICES</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="#" onclick="listaIndices()">Cargar Indices BCS <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="#" onclick="verInfo()">Dash Board</a>
+            </li>
+          </ul>
+      
+        </div>
+      </nav>
+
+    <div class="demo-section wide">
+        <div id="chart" style="background: center no-repeat url('../content/shared/styles/world-map.png');"></div>
+    </div>
+
+
+    <hr>
+    <div id="app"></div>
+
+</body>
+</html>
